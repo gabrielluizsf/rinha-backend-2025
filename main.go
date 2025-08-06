@@ -10,6 +10,8 @@ import (
 	"github.com/gabrielluizsf/rinha-backend-2005/worker"
 )
 
+const PORT = "8080"
+
 func main() {
 	db.InitRedis()
 
@@ -19,6 +21,6 @@ func main() {
 	worker.StartLeaderElection()
 	worker.StartWorker()
 
-	fmt.Println("Server running on :8080")
-	log.Fatal(http.ListenAndServe(":8080", routerManager))
+	fmt.Printf("Server running on :%s\n", PORT)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", PORT), routerManager))
 }
