@@ -27,7 +27,7 @@ services:
       - PROCESSOR_DEFAULT_URL=http://payment-processor-default:8080
       - PROCESSOR_FALLBACK_URL=http://payment-processor-fallback:8080
       - INSTANCE_ID=API-1
-      - WORKER_CONCURRENCY=16
+      - WORKER_CONCURRENCY=50
     networks:
       - rinha-net
       - payment-processor-net
@@ -50,7 +50,7 @@ services:
       - PROCESSOR_DEFAULT_URL=http://payment-processor-default:8080
       - PROCESSOR_FALLBACK_URL=http://payment-processor-fallback:8080
       - INSTANCE_ID=API-2
-      - WORKER_CONCURRENCY=16
+      - WORKER_CONCURRENCY=50
 
   redis:
     image: redis:7.2-alpine
