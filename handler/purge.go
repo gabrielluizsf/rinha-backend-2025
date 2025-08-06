@@ -3,19 +3,13 @@ package handler
 import (
 	"net/http"
 
+	"github.com/gabrielluizsf/rinha-backend-2005/adapter"
 	"github.com/gabrielluizsf/rinha-backend-2005/db"
 )
 
-func PurgePayments(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
+func PurgePayments(c adapter.RequestContext) error {
 	if err := db.Purge("payments"); err != nil {
-		http.Error(w, "Failed to purge payments", http.StatusInternalServerError)
-		return
+		return c.Status(http.StatusInternalServerError).SendString("Failed to purge payments")
 	}
-
-	w.WriteHeader(http.StatusOK)
+	return c.SendStatus(http.StatusOK)
 }

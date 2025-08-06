@@ -5,38 +5,29 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gabrielluizsf/rinha-backend-2005/adapter"
 	"github.com/gabrielluizsf/rinha-backend-2005/date"
 	"github.com/gabrielluizsf/rinha-backend-2005/db"
 	"github.com/gabrielluizsf/rinha-backend-2005/types"
 	"github.com/i9si-sistemas/stringx"
 )
 
-func PaymentsSummary(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	from, to, useFilter, err := parseTimeRange(r)
+func PaymentsSummary(c adapter.RequestContext) error {
+	from, to, useFilter, err := parseTimeRange(c)
 	if err != nil {
 		if err == http.ErrMissingFile {
-			http.Error(w, "Both 'from' and 'to' query parameters are required, or omit both for all data", http.StatusBadRequest)
+			return c.Status(http.StatusBadRequest).SendString("Both 'from' and 'to' query parameters are required, or omit both for all data")
 		} else {
-			http.Error(w, "Invalid datetime format", http.StatusBadRequest)
+			return c.Status(http.StatusBadRequest).SendString("Invalid datetime format")
 		}
-		return
 	}
-
 	paymentsData, err := db.GetAll("payments")
 	if err != nil {
-		http.Error(w, "Failed to retrieve payments from Redis", http.StatusInternalServerError)
-		return
+		return c.Status(http.StatusInternalServerError).SendString("Failed to retrieve payments from Redis")
 	}
-
 	resp := summarizePayments(paymentsData, from, to, useFilter)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	return c.JSON(resp)
 }
 
 func summarizePayments(
@@ -82,9 +73,9 @@ func summarizePayments(
 	}
 }
 
-func parseTimeRange(r *http.Request) (from, to time.Time, filter bool, err error) {
+func parseTimeRange(c adapter.RequestContext) (from, to time.Time, filter bool, err error) {
 	getQuery := func(name string) string {
-		return r.URL.Query().Get(name)
+		return c.Query(name)
 	}
 	fromParam, toParam := getQuery("from"), getQuery("to")
 	isEmpty := func(s string) bool { return stringx.IsEmpty(s) }

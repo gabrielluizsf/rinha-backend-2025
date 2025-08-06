@@ -1,17 +1,12 @@
 package routes
 
 import (
-	"net/http"
-
+	"github.com/gabrielluizsf/rinha-backend-2005/adapter"
 	"github.com/gabrielluizsf/rinha-backend-2005/handler"
 )
 
-type RouterRegister interface {
-	HandleFunc(endpoint string, handler func(http.ResponseWriter, *http.Request))
-}
-
-func InitRoutes(r RouterRegister) {
-	r.HandleFunc("/payments", handler.Payments)
-	r.HandleFunc("/payments-summary", handler.PaymentsSummary)
-	r.HandleFunc("/purge-payments", handler.PurgePayments)
+func InitRoutes(app adapter.ServerManager) {
+	app.Post("/payments", handler.Payments)
+	app.Get("/payments-summary", handler.PaymentsSummary)
+	app.Post("/purge-payments", handler.PurgePayments)
 }

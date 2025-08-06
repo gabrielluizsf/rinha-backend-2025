@@ -4,32 +4,25 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gabrielluizsf/rinha-backend-2005/adapter"
 	"github.com/gabrielluizsf/rinha-backend-2005/db"
 	"github.com/gabrielluizsf/rinha-backend-2005/types"
 )
 
-func Payments(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
+func Payments(c adapter.RequestContext) error {
 	var p types.PaymentRequest
-	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
+	if err := c.BodyParser(&p); err != nil {
+		return c.Status(http.StatusBadRequest).SendString("Invalid JSON")
 	}
-
 	data, err := json.Marshal(p)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+		statusCode := http.StatusInternalServerError
+		statusText := http.StatusText(statusCode)
+		return c.Status(statusCode).SendString(statusText)
 	}
-
 	if err := db.Save("payments_pending", data); err != nil {
-		http.Error(w, "Failed to queue payment", http.StatusInternalServerError)
-		return
+		return c.Status(http.StatusInternalServerError).SendString("Failed to queue payment")
 	}
 
-	w.WriteHeader(http.StatusAccepted)
+	return c.SendStatus(http.StatusAccepted)
 }
